@@ -847,7 +847,7 @@ export const countryCodes: CountryItem[] = [
             "ro": "Bosnia si Hertegovina",
             "bg": "Босна и Херцеговина",
             "de": "Bosnien und Herzegowina",
-            "fr": "Bosnie Herzégovine",
+            "fr": "Bosnie-Herzégovine",
             "nl": "Bosnië-Herzegovina",
             "it": "Bosnia Erzegovina",
             "cn": "波斯尼亚和黑塞哥维那（简称：波黑",
