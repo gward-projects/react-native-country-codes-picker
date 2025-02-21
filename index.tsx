@@ -77,7 +77,7 @@ export const CountryPicker = ({
     inputPlaceholder,
     inputPlaceholderTextColor,
     searchMessage,
-    lang = 'en',
+    lang = 'fr',
     style,
     enableModalAvoiding,
     androidWindowSoftInputMode,
@@ -271,7 +271,7 @@ export const CountryPicker = ({
                             style={[styles.searchBar, style?.textInput]}
                             value={searchValue}
                             onChangeText={setSearchValue}
-                            placeholder={inputPlaceholder || 'Search your country'}
+                            placeholder={inputPlaceholder || 'Recherchez votre pays'}
                             placeholderTextColor={inputPlaceholderTextColor || '#8c8c8c'}
                             testID='countryCodesPickerSearchInput'
                             {...rest}
@@ -289,7 +289,7 @@ export const CountryPicker = ({
                                     style?.searchMessageText,
                                 ]}
                             >
-                                {searchMessage || 'Sorry we cant find your country :('}
+                                {searchMessage || 'Désolé, nous ne pouvons pas trouver votre pays :('}
                             </Text>
                         </View>
                     ) : (
