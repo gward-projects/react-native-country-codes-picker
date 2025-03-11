@@ -271,7 +271,7 @@ export const CountryPicker = ({
                             style={[styles.searchBar, style?.textInput]}
                             value={searchValue}
                             onChangeText={setSearchValue}
-                            placeholder={inputPlaceholder || 'Recherchez votre pays'}
+                            placeholder={inputPlaceholder || 'Search your country'}
                             placeholderTextColor={inputPlaceholderTextColor || '#8c8c8c'}
                             testID='countryCodesPickerSearchInput'
                             {...rest}
@@ -289,7 +289,7 @@ export const CountryPicker = ({
                                     style?.searchMessageText,
                                 ]}
                             >
-                                {searchMessage || 'Désolé, nous ne pouvons pas trouver votre pays :('}
+                                {searchMessage || 'Sorry, we cant find your country :('}
                             </Text>
                         </View>
                     ) : (
