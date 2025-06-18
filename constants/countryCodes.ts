@@ -1815,18 +1815,6 @@ export const countryCodes: CountryItem[] = [
     },
     {
         "name": {
-            "en": "Netherlands Antilles",
-            "es": "Antillas Neerlandesas",
-            "de": "Niederländische Antillen",
-            "fr": "Antilles néerlandaises",
-            "it": "Antille Olandesi",
-        },
-        "dial_code": "+599",
-        "code": "AN",
-        "flag": "🇦🇳"
-    },
-    {
-        "name": {
             "en": "New Caledonia",
             "es": "Nueva Caledonia",
             "de": "Neu-Kaledonien",
