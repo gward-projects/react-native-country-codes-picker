@@ -1,4 +1,4 @@
-import {ViewStyle, TextStyle} from "react-native";
+import {TextStyle, ViewStyle} from "react-native";
 
 export interface ItemTemplateProps {
     item: CountryItem,
@@ -8,17 +8,21 @@ export interface ItemTemplateProps {
 }
 
 export interface ListHeaderComponentProps {
-  countries: CountryItem[],
-  lang: string,
-  onPress: (item: CountryItem) => void,
+    countries: CountryItem[],
+    lang: string,
+    onPress: (item: CountryItem) => void,
 }
 
 export interface CountryItem {
-    name: {[key: string]: string},
+    name: { [key: string]: string },
     dial_code: string,
     code: string,
     flag: string
 }
+
+export type CountryItemWithType = {
+    __type: string,
+} & CountryItem;
 
 export interface Style {
     backdrop?: ViewStyle,

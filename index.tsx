@@ -1,27 +1,27 @@
-import React from 'react';
+import React, {JSX} from 'react';
 import {
-    FlatList,
-    TextInput,
-    View,
-    Text,
     Animated,
     Dimensions,
     Easing,
-    Platform,
+    FlatList,
     Keyboard,
-    ViewStyle,
     Modal,
-    TextStyle
+    Platform,
+    Text,
+    TextInput,
+    TextStyle,
+    View,
+    ViewStyle
 } from 'react-native';
-import { CountryItem, ItemTemplateProps, Style, ListHeaderComponentProps } from "./types/Types";
-import { useKeyboardStatus } from "./helpers/useKeyboardStatus";
-import { CountryButton } from "./components/CountryButton";
-import { countriesRemover } from "./helpers/countriesRemover";
-import { removeDiacritics } from './helpers/diacriticsRemover';
+import {CountryItem, CountryItemWithType, ItemTemplateProps, ListHeaderComponentProps, Style} from "./types/Types";
+import {useKeyboardStatus} from "./helpers/useKeyboardStatus";
+import {CountryButton} from "./components/CountryButton";
+import {countriesRemover} from "./helpers/countriesRemover";
+import {removeDiacritics} from './helpers/diacriticsRemover';
 
-export { countryCodes } from './constants/countryCodes'
-export { CountryButton } from "./components/CountryButton";
-export type { CountryItem, ItemTemplateProps, Style, ListHeaderComponentProps } from "./types/Types";
+export {countryCodes} from './constants/countryCodes'
+export {CountryButton} from "./components/CountryButton";
+export type {CountryItem, ItemTemplateProps, Style, ListHeaderComponentProps} from "./types/Types";
 
 
 const height = Dimensions.get('window').height;
@@ -71,26 +71,26 @@ interface Props {
 }
 
 export const CountryPicker = ({
-    show,
-    popularCountries,
-    pickerButtonOnPress,
-    inputPlaceholder,
-    inputPlaceholderTextColor,
-    searchMessage,
-    lang = 'en',
-    style,
-    enableModalAvoiding,
-    androidWindowSoftInputMode,
-    onBackdropPress,
-    disableBackdrop,
-    excludedCountries,
-    initialState,
-    onRequestClose,
-    showOnly,
-    ListHeaderComponent,
-    itemTemplate: ItemTemplate = CountryButton,
-    ...rest
-}: Props) => {
+                                  show,
+                                  popularCountries,
+                                  pickerButtonOnPress,
+                                  inputPlaceholder,
+                                  inputPlaceholderTextColor,
+                                  searchMessage,
+                                  lang = 'en',
+                                  style,
+                                  enableModalAvoiding,
+                                  androidWindowSoftInputMode,
+                                  onBackdropPress,
+                                  disableBackdrop,
+                                  excludedCountries,
+                                  initialState,
+                                  onRequestClose,
+                                  showOnly,
+                                  ListHeaderComponent,
+                                  itemTemplate: ItemTemplate = CountryButton,
+                                  ...rest
+                              }: Props) => {
     // ToDo refactor exclude and showOnly props to objects
     let filteredCodes = countriesRemover(excludedCountries);
     const keyboardStatus = useKeyboardStatus();
@@ -134,13 +134,13 @@ export const CountryPicker = ({
         }
     }, [keyboardStatus.isOpen]);
 
-    const preparedPopularCountries = React.useMemo(() => {
+    const preparedPopularCountries: CountryItem[] = React.useMemo(() => {
         return filteredCodes?.filter(country => {
             return (popularCountries?.find(short => country?.code === short?.toUpperCase()));
         });
     }, [popularCountries]);
 
-    const codes = React.useMemo(() => {
+    const codes: CountryItem[] = React.useMemo(() => {
         let newCodes = filteredCodes;
 
         if (showOnly?.length) {
@@ -148,12 +148,13 @@ export const CountryPicker = ({
                 return (showOnly?.find(short => country?.code === short?.toUpperCase()));
             });
         }
+
         newCodes.sort((a, b) => (a?.name[lang || 'en'].localeCompare(b?.name[lang || 'en'])));
 
         return newCodes;
     }, [showOnly, excludedCountries, lang]);
 
-    const resultCountries = React.useMemo(() => {
+    const resultCountries: CountryItem[] = React.useMemo(() => {
         const lowerSearchValue = searchValue.toLowerCase();
 
         return codes.filter((country) => {
@@ -164,7 +165,33 @@ export const CountryPicker = ({
                 return country;
             }
         });
-    }, [searchValue]);
+    }, [searchValue, codes, lang]);
+
+    const finalCountries: CountryItemWithType[] = React.useMemo(() => {
+        if (!popularCountries || searchValue) {
+            // Si recherche : pas de section "popular"
+            return [
+                ...resultCountries.map(c => ({...c, __type: "normal"}))
+            ];
+        }
+
+        const popularList = preparedPopularCountries || [];
+        const otherList = resultCountries.filter(
+            c => !popularList.some(p => p.code === c.code)
+        );
+
+        return [
+            ...popularList.map(c => ({...c, __type: "popular"})),
+            {
+                __type: "separator",
+                name: {},
+                dial_code: "",
+                code: "",
+                flag: ""
+            }, // Fake item
+            ...otherList.map(c => ({...c, __type: "normal"})),
+        ];
+    }, [resultCountries, popularCountries, searchValue]);
 
     const modalPosition = animationDriver.interpolate({
         inputRange: [0, 1],
@@ -194,7 +221,13 @@ export const CountryPicker = ({
         }).start(() => setShowModal(false));
     };
 
-    const renderItem = ({ item, index }: { item: CountryItem, index: number }) => {
+    const renderItem = ({item, index}: { item: CountryItemWithType, index: number }) => {
+        if (item.__type === "separator") {
+            return (
+                <View style={{height: 1.5, backgroundColor: '#eceff1', marginVertical: 8}}/>
+            );
+        }
+
         let itemName = item?.name[lang];
         let checkName = itemName?.length ? itemName : item?.name['en'];
 
@@ -206,7 +239,7 @@ export const CountryPicker = ({
                 name={checkName}
                 onPress={() => {
                     Keyboard.dismiss();
-                    typeof pickerButtonOnPress === 'function' && pickerButtonOnPress(item);
+                    pickerButtonOnPress?.(item);
                 }}
             />
         );
@@ -277,7 +310,7 @@ export const CountryPicker = ({
                             {...rest}
                         />
                     </View>
-                    <View style={[styles.line, style?.line]} />
+                    <View style={[styles.line, style?.line]}/>
                     {resultCountries.length === 0 ? (
                         <View style={[styles.countryMessage, style?.countryMessageContainer]}>
                             <Text
@@ -295,8 +328,8 @@ export const CountryPicker = ({
                     ) : (
                         <FlatList
                             showsVerticalScrollIndicator={false}
-                            data={(resultCountries || codes)}
-                            keyExtractor={(item, index) => '' + item + index}
+                            data={finalCountries}
+                            keyExtractor={(country) => country.code}
                             initialNumToRender={10}
                             maxToRenderPerBatch={10}
                             style={[style?.itemsList]}
@@ -347,17 +380,17 @@ interface CountryListProps {
 }
 
 export const CountryList = ({
-    showOnly,
-    popularCountries,
-    lang = 'en',
-    searchValue = '',
-    excludedCountries,
-    style,
-    pickerButtonOnPress,
-    ListHeaderComponent,
-    itemTemplate: ItemTemplate = CountryButton,
-    ...rest
-}: CountryListProps) => {
+                                showOnly,
+                                popularCountries,
+                                lang = 'en',
+                                searchValue = '',
+                                excludedCountries,
+                                style,
+                                pickerButtonOnPress,
+                                ListHeaderComponent,
+                                itemTemplate: ItemTemplate = CountryButton,
+                                ...rest
+                            }: CountryListProps) => {
     // ToDo refactor exclude and showOnly props to objects
     let filteredCodes = countriesRemover(excludedCountries);
 
@@ -392,7 +425,7 @@ export const CountryList = ({
         });
     }, [searchValue]);
 
-    const renderItem = ({ item, index }: { item: CountryItem, index: number }) => {
+    const renderItem = ({item, index}: { item: CountryItem, index: number }) => {
         let itemName = item?.name[lang];
         let checkName = itemName.length ? itemName : item?.name['en'];
 
