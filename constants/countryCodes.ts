@@ -1101,7 +1101,7 @@ export const countryCodes: CountryItem[] = [
             "fr": "Saint-Siège (État de la Cité du Vatican)",
             "it": "Santa Sede (Stato della Città del Vaticano)",
         },
-        "dial_code": "+379",
+        "dial_code": "+39",
         "code": "VA",
         "flag": "🇻🇦"
     },

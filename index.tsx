@@ -77,7 +77,7 @@ export const CountryPicker = ({
     inputPlaceholder,
     inputPlaceholderTextColor,
     searchMessage,
-    lang = 'fr',
+    lang = 'en',
     style,
     enableModalAvoiding,
     androidWindowSoftInputMode,
