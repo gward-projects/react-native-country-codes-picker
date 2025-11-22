@@ -46,9 +46,9 @@ const height = Dimensions.get('window').height;
  */
 
 interface Props {
-    excludedCountries?: string[],
-    showOnly?: string[],
-    popularCountries?: string[],
+    excludedCountries?: readonly string[],
+    showOnly?: readonly string[],
+    popularCountries?: readonly string[],
 
     style?: Style,
 
