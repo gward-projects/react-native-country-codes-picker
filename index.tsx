@@ -135,9 +135,16 @@ export const CountryPicker = ({
     }, [keyboardStatus.isOpen]);
 
     const preparedPopularCountries: CountryItem[] = React.useMemo(() => {
-        return filteredCodes?.filter(country => {
+        const filtered = filteredCodes.filter(country => {
             return (popularCountries?.find(short => country?.code === short?.toUpperCase()));
         });
+
+        if (!popularCountries) {
+            return filtered;
+        }
+
+        // Keep the same order
+        return filtered.sort((a, b) => popularCountries.indexOf(a.code) - popularCountries.indexOf(b.code));
     }, [popularCountries]);
 
     const codes: CountryItem[] = React.useMemo(() => {
