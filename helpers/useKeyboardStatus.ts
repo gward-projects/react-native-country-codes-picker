@@ -9,10 +9,10 @@ import {EmitterSubscription, Keyboard, Platform} from "react-native";
 export const useKeyboardStatus = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
-    const keyboardHideListener = useRef<null|EmitterSubscription>(null);
-    const keyboardShowListener = useRef<null|EmitterSubscription>(null);
+    const keyboardHideListener = useRef<null | EmitterSubscription>(null);
+    const keyboardShowListener = useRef<null | EmitterSubscription>(null);
 
-    const onKeyboardShow = (e: {endCoordinates:{height:React.SetStateAction<number>;};}) => {
+    const onKeyboardShow = (e: { endCoordinates: { height: React.SetStateAction<number>; }; }) => {
         setKeyboardHeight(e.endCoordinates.height);
         setIsOpen(true);
     };

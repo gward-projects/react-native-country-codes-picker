@@ -1,9 +1,9 @@
 import React from 'react';
-import { Text, TouchableOpacity, ViewStyle } from "react-native";
-import { ItemTemplateProps } from "../types/Types";
+import {Text, TouchableOpacity, ViewStyle} from "react-native";
+import {ItemTemplateProps} from "../types/Types";
 
 
-export const CountryButton = ({ item, name, style, ...rest }: ItemTemplateProps) => (
+export const CountryButton = ({item, name, style, ...rest}: ItemTemplateProps) => (
     <TouchableOpacity
         style={[styles.countryButton, style?.countryButtonStyles]}
         testID="countryCodesPickerCountryButton"
