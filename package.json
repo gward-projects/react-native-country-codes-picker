@@ -4,8 +4,10 @@
   "description": "This lib. provide country iso picker with search functionality",
   "main": "index.tsx",
   "scripts": {
+    "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "packageManager": "yarn@4.13.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GeorgeHop/react-native-country-codes-picker.git"
@@ -37,9 +39,10 @@
     "react-native": "*"
   },
   "devDependencies": {
-    "@types/react": "19.1.13",
-    "react-native": "0.81.4",
-    "typescript": "5.9.2"
+    "@types/react": "19.2.14",
+    "react": "19.2.3",
+    "react-native": "0.84.1",
+    "typescript": "5.9.3"
   },
   "homepage": "https://github.com/GeorgeHop/react-native-country-codes-picker#readme"
 }
