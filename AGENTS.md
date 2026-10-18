@@ -97,10 +97,11 @@ imports de types avec les modules du projet.
 - `helpers/countryName.ts` : nom du pays dans la langue demandée, repli sur l'anglais, utilisé
   pour l'affichage, le tri et la recherche ;
 - `CountryItem.name` exige une clé `en` ;
-- `CountryList` recalcule sa recherche quand `lang` ou la liste des pays change ; l'ouverture de
-  la modale est dérivée pendant le rendu plutôt que par un `setState` dans un effet ;
+- `CountryList` recalcule sa recherche quand `lang` ou la liste des pays change ;
 - `CountryPicker` : rouvrir la modale pendant son animation de fermeture relance l'ouverture
-  (avant, la modale se cachait alors que `show` valait `true`).
+  (avant, la modale se cachait alors que `show` valait `true`). L'ouverture reste celle de l'amont
+  (`setShowModal` dans un effet, règle `set-state-in-effect` désactivée sur cette ligne) : la
+  dériver pendant le rendu laissait la modale invisible dans gward-app, sur le web et iOS.
 
 ## Dépendances
 

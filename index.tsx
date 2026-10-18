@@ -1,4 +1,4 @@
-import React, {JSX} from 'react';
+import {JSX, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     Animated,
     Dimensions,
@@ -94,25 +94,18 @@ export const CountryPicker = ({
                                   ...rest
                               }: Props) => {
     // ToDo refactor exclude and showOnly props to objects
-    const filteredCodes = React.useMemo(() => countriesRemover(excludedCountries), [excludedCountries]);
+    const filteredCodes = useMemo(() => countriesRemover(excludedCountries), [excludedCountries]);
     const keyboardStatus = useKeyboardStatus();
-    const animationDriver = React.useRef(new Animated.Value(0)).current;
-    const animatedMargin = React.useRef(new Animated.Value(0)).current;
-    const [searchValue, setSearchValue] = React.useState<string>(initialState || '');
-    const [showModal, setShowModal] = React.useState<boolean>(show);
-    const [previousShow, setPreviousShow] = React.useState<boolean>(show);
-
-    // Opening is applied during render; closing waits for the animation to end.
-    if (show !== previousShow) {
-        setPreviousShow(show);
-        if (show) setShowModal(true);
-    }
+    const animationDriver = useRef(new Animated.Value(0)).current;
+    const animatedMargin = useRef(new Animated.Value(0)).current;
+    const [searchValue, setSearchValue] = useState<string>(initialState || '');
+    const [showModal, setShowModal] = useState<boolean>(false);
 
     // True while the closing animation runs: the modal is still visible, so reopening it
     // then must restart the opening animation, since onShow will not fire again.
-    const isClosing = React.useRef(false);
+    const isClosing = useRef(false);
 
-    const openModal = React.useCallback(() => {
+    const openModal = useCallback(() => {
         isClosing.current = false;
         Animated.timing(animationDriver, {
             toValue: 1,
@@ -121,7 +114,7 @@ export const CountryPicker = ({
         }).start();
     }, [animationDriver]);
 
-    const closeModal = React.useCallback(() => {
+    const closeModal = useCallback(() => {
         isClosing.current = true;
         Animated.timing(animationDriver, {
             toValue: 0,
@@ -135,12 +128,19 @@ export const CountryPicker = ({
         });
     }, [animationDriver]);
 
-    React.useEffect(() => {
-        if (!show) closeModal();
-        else if (isClosing.current) openModal();
+    useEffect(() => {
+        if (show) {
+            // Same opening as upstream. Deriving showModal during render instead left the
+            // modal invisible in gward-app, on the web and on iOS (tested on 18/10/2026).
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setShowModal(true);
+            if (isClosing.current) openModal();
+        } else {
+            closeModal();
+        }
     }, [show, closeModal, openModal]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (
             enableModalAvoiding &&
             (
@@ -174,7 +174,7 @@ export const CountryPicker = ({
         keyboardStatus.keyboardPlatform,
     ]);
 
-    const preparedPopularCountries: CountryItem[] = React.useMemo(() => {
+    const preparedPopularCountries: CountryItem[] = useMemo(() => {
         const filtered = filteredCodes.filter(country => {
             return (popularCountries?.find(short => country?.code === short?.toUpperCase()));
         });
@@ -187,7 +187,7 @@ export const CountryPicker = ({
         return filtered.sort((a, b) => popularCountries.indexOf(a.code) - popularCountries.indexOf(b.code));
     }, [filteredCodes, popularCountries]);
 
-    const codes: CountryItem[] = React.useMemo(() => {
+    const codes: CountryItem[] = useMemo(() => {
         let newCodes = filteredCodes;
 
         if (showOnly?.length) {
@@ -199,7 +199,7 @@ export const CountryPicker = ({
         return [...newCodes].sort((a, b) => countryName(a, lang).localeCompare(countryName(b, lang)));
     }, [filteredCodes, showOnly, lang]);
 
-    const resultCountries: CountryItem[] = React.useMemo(() => {
+    const resultCountries: CountryItem[] = useMemo(() => {
         const lowerSearchValue = searchValue.toLowerCase();
 
         return codes.filter((country) => {
@@ -210,7 +210,7 @@ export const CountryPicker = ({
         });
     }, [searchValue, codes, lang]);
 
-    const finalCountries: CountryItemWithType[] = React.useMemo(() => {
+    const finalCountries: CountryItemWithType[] = useMemo(() => {
         if (!popularCountries || searchValue) {
             // Si recherche : pas de section "popular"
             return [
@@ -416,15 +416,15 @@ export const CountryList = ({
                                 ...rest
                             }: CountryListProps) => {
     // ToDo refactor exclude and showOnly props to objects
-    const filteredCodes = React.useMemo(() => countriesRemover(excludedCountries), [excludedCountries]);
+    const filteredCodes = useMemo(() => countriesRemover(excludedCountries), [excludedCountries]);
 
-    const preparedPopularCountries = React.useMemo(() => {
+    const preparedPopularCountries = useMemo(() => {
         return filteredCodes?.filter(country => {
             return (popularCountries?.find(short => country?.code === short?.toUpperCase()));
         });
     }, [filteredCodes, popularCountries]);
 
-    const codes = React.useMemo(() => {
+    const codes = useMemo(() => {
         let newCodes = filteredCodes;
 
         if (showOnly?.length) {
@@ -436,7 +436,7 @@ export const CountryList = ({
         return newCodes
     }, [filteredCodes, showOnly]);
 
-    const resultCountries = React.useMemo(() => {
+    const resultCountries = useMemo(() => {
         const lowerSearchValue = searchValue.toLowerCase();
 
         return codes.filter((country) => {

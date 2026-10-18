@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import {type SetStateAction, useEffect, useRef, useState} from "react";
 import {EmitterSubscription, Keyboard, Platform} from "react-native";
 
 /*
@@ -12,7 +12,7 @@ export const useKeyboardStatus = () => {
     const keyboardHideListener = useRef<null | EmitterSubscription>(null);
     const keyboardShowListener = useRef<null | EmitterSubscription>(null);
 
-    const onKeyboardShow = (e: { endCoordinates: { height: React.SetStateAction<number>; }; }) => {
+    const onKeyboardShow = (e: { endCoordinates: { height: SetStateAction<number>; }; }) => {
         setKeyboardHeight(e.endCoordinates.height);
         setIsOpen(true);
     };
