@@ -9,7 +9,7 @@ remote (`git remote add upstream <url>` pour fusionner ses changements).
 ## Rôle et consommateur
 
 Le seul consommateur est **gward-app**, qui installe ce fork depuis Git (commit épinglé dans son
-`package.json`) et ne l'importe qu'à travers `app/components/Form/AppCountryPicker.tsx`.
+`package.json`) et ne l'importe qu'à travers un seul composant d'enveloppe.
 
 Le point d'entrée (`main`) est `index.tsx` : `yarn typecheck` de gward-app compile donc les sources
 de ce fork avec le tsconfig de l'app. Un fork qui passe ses propres contrôles doit donc aussi passer
@@ -18,8 +18,7 @@ ceux de l'app.
 ## Règle principale
 
 Appliquer les pratiques de gward-app : conventions, tsconfig, lint, tests et vérification. En cas de
-doute, regarder comment gward-app fait (`documentation/instructions/`, `eslint.config.js`,
-`tools/checks/`) et faire de même.
+doute, regarder comment gward-app fait et faire de même.
 
 - **TypeScript partout** : pas de JavaScript lorsqu'il est simplement évitable, fichiers de
   configuration compris (`eslint.config.ts`).
@@ -69,25 +68,23 @@ suffixé `.test.ts`. Ils s'exécutent avec `node --import tsx --test`, sans bibl
 lanceur échoue si `tests/` est absent ou vide.
 
 Toute modification de code impose de passer en revue les tests des fichiers touchés : en ajouter, en
-corriger ou en supprimer, comme dans gward-app
-(`documentation/instructions/tests-et-verification.md`).
+corriger ou en supprimer, comme dans
+gward-app.
 
 Hors d'atteinte en l'état : les composants `index.tsx` et `components/CountryButton.tsx`, et
 `helpers/useKeyboardStatus.ts` (ils importent `react-native`).
 
 ## Fichiers copiés de gward-app
 
-Ces fichiers sont des copies : quand l'original change dans gward-app, mettre à jour les trois
-forks.
+Ces fichiers sont des copies d'outils de gward-app : quand l'original change, mettre à jour les
+trois forks. La correspondance avec les originaux est tenue dans gward-app (vérification des
+écarts entre dépôts).
 
-| Fichier du fork | Original dans gward-app |
-| --------------- | ----------------------- |
-| `tools/eslint/sortImportsByFirstName.ts` | `tools/eslint/sortImportsByFirstName.js` (converti en TypeScript) |
-| `tests/tools/eslint/sortImportsByFirstName.test.ts` | `tests/tools/eslint/sortImportsByFirstName.test.ts` |
-| `tools/checks/staticChecks.ts` et son test | `tools/checks/staticChecks.ts` et son test |
-| `tools/checks/check.ts`, `tools/checks/test.ts` | mêmes fichiers, réduits à ce qu'un fork contrôle |
-| `.husky/pre-commit` | `.husky/pre-commit` |
-| règles de `eslint.config.ts` | `eslint.config.js`, sans les restrictions d'imports propres à l'app |
+- `tools/eslint/sortImportsByFirstName.ts` (convertie en TypeScript) et son test ;
+- `tools/checks/staticChecks.ts` et son test ;
+- `tools/checks/check.ts` et `tools/checks/test.ts`, réduits à ce qu'un fork contrôle ;
+- `.husky/pre-commit` ;
+- les règles d'`eslint.config.ts`, sans les restrictions d'imports propres à l'app.
 
 `eslint.config.ts` ajoute un `pathGroups` qui range les paquets `react-native*` parmi les
 bibliothèques : la configuration Expo les ignore lors de la résolution, ce qui classait leurs
@@ -115,8 +112,7 @@ imports de types avec les modules du projet.
 ## Dépendances
 
 Une montée de versions qui demande d'examiner des différences se consigne dans
-[`JOURNAL.md`](./JOURNAL.md), selon la méthode de gward-app
-(`documentation/procedures/agents/mettre-a-jour-dependances.md`).
+[`JOURNAL.md`](./JOURNAL.md), selon la méthode de gward-app.
 
 Dependabot (`.github/dependabot.yml`) vérifie une fois par mois, sur la branche par défaut. Ses PR
 ne servent que de **veille** : elles signalent qu'une version est sortie, la montée se fait à la
