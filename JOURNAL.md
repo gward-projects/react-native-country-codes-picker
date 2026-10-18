@@ -40,9 +40,10 @@ sans différence à analyser ne nécessite pas d'entrée.
   donne le nom traduit ou l'anglais. Une langue sans traduction ne fait plus planter le tri ni la
   recherche.
 - `react-hooks/exhaustive-deps` : `CountryList` ne recalculait pas sa recherche quand `lang` ou la
-  liste changeait ; corrigé. L'ouverture de la modale est dérivée pendant le rendu plutôt que par
-  un `setState` dans un effet ; la fermeture garde son animation. Le tri ne modifie plus la liste
-  mémorisée en place.
+  liste changeait ; corrigé. Le tri ne modifie plus la liste mémorisée en place. L'ouverture et la
+  fermeture de la modale restent celles de l'amont (règle `set-state-in-effect` désactivée sur une
+  ligne) : les deux tentatives de les réécrire ont échoué dans gward-app (voir `AGENTS.md`). Un
+  toucher sur le fond n'est pris en compte qu'une fois l'ouverture terminée (2.4.1).
 
 ### Alignement sur gward-app
 
@@ -73,5 +74,5 @@ sans différence à analyser ne nécessite pas d'entrée.
 - **Non fait** : comparaison des archives npm et des commits amont entre versions de départ et
   d'arrivée. Les versions n'interviennent qu'en développement (les `peerDependencies` restent à
   `*`) ; seules les erreurs de compilation et de lint ont été analysées.
-- **À vérifier dans gward-app** : ouverture et fermeture de la modale, recherche et tri en
-  français, section « populaires ».
+- Testé dans gward-app par le propriétaire sur le web, iOS et Android avec 2.4.1 (ouverture,
+  fermeture, clics rapides, recherche, tri).
