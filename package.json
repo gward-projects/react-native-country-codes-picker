@@ -3,11 +3,21 @@
   "version": "2.3.5",
   "description": "This lib. provide country iso picker with search functionality",
   "main": "index.tsx",
+  "files": [
+    "index.tsx",
+    "components",
+    "constants",
+    "helpers",
+    "types"
+  ],
   "scripts": {
-    "type-check": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check": "tsx tools/checks/check.ts",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tests && tsc --noEmit -p tools/checks",
+    "test": "tsx tools/checks/test.ts",
+    "setup-hooks": "husky"
   },
-  "packageManager": "yarn@4.13.0",
+  "packageManager": "yarn@4.18.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GeorgeHop/react-native-country-codes-picker.git"
@@ -39,10 +49,17 @@
     "react-native": "*"
   },
   "devDependencies": {
-    "@types/react": "19.2.14",
-    "react": "19.2.3",
-    "react-native": "0.84.1",
-    "typescript": "5.9.3"
+    "@types/estree": "1.0.9",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-expo": "58.0.4",
+    "husky": "9.1.7",
+    "jiti": "2.7.0",
+    "react": "19.3.0",
+    "react-native": "0.88.0",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
   },
   "homepage": "https://github.com/GeorgeHop/react-native-country-codes-picker#readme"
 }

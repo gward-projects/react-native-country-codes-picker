@@ -13,11 +13,13 @@ import {
     View,
     ViewStyle
 } from 'react-native';
-import {CountryItem, CountryItemWithType, ItemTemplateProps, ListHeaderComponentProps, Style} from "./types/Types";
-import {useKeyboardStatus} from "./helpers/useKeyboardStatus";
-import {CountryButton} from "./components/CountryButton";
+
 import {countriesRemover} from "./helpers/countriesRemover";
+import {CountryButton} from "./components/CountryButton";
+import {CountryItem, CountryItemWithType, ItemTemplateProps, ListHeaderComponentProps, Style} from "./types/Types";
+import {countryName} from './helpers/countryName';
 import {removeDiacritics} from './helpers/diacriticsRemover';
+import {useKeyboardStatus} from "./helpers/useKeyboardStatus";
 
 export {countryCodes} from './constants/countryCodes'
 export {CountryButton} from "./components/CountryButton";
@@ -92,20 +94,51 @@ export const CountryPicker = ({
                                   ...rest
                               }: Props) => {
     // ToDo refactor exclude and showOnly props to objects
-    let filteredCodes = countriesRemover(excludedCountries);
+    const filteredCodes = React.useMemo(() => countriesRemover(excludedCountries), [excludedCountries]);
     const keyboardStatus = useKeyboardStatus();
     const animationDriver = React.useRef(new Animated.Value(0)).current;
     const animatedMargin = React.useRef(new Animated.Value(0)).current;
     const [searchValue, setSearchValue] = React.useState<string>(initialState || '');
-    const [showModal, setShowModal] = React.useState<boolean>(false);
+    const [showModal, setShowModal] = React.useState<boolean>(show);
+    const [previousShow, setPreviousShow] = React.useState<boolean>(show);
+
+    // Opening is applied during render; closing waits for the animation to end.
+    if (show !== previousShow) {
+        setPreviousShow(show);
+        if (show) setShowModal(true);
+    }
+
+    // True while the closing animation runs: the modal is still visible, so reopening it
+    // then must restart the opening animation, since onShow will not fire again.
+    const isClosing = React.useRef(false);
+
+    const openModal = React.useCallback(() => {
+        isClosing.current = false;
+        Animated.timing(animationDriver, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+        }).start();
+    }, [animationDriver]);
+
+    const closeModal = React.useCallback(() => {
+        isClosing.current = true;
+        Animated.timing(animationDriver, {
+            toValue: 0,
+            duration: 400,
+            useNativeDriver: true,
+        }).start(({finished}) => {
+            // Interrupted by a reopening: the modal must stay visible.
+            if (!finished) return;
+            isClosing.current = false;
+            setShowModal(false);
+        });
+    }, [animationDriver]);
 
     React.useEffect(() => {
-        if (show) {
-            setShowModal(true);
-        } else {
-            closeModal();
-        }
-    }, [show]);
+        if (!show) closeModal();
+        else if (isClosing.current) openModal();
+    }, [show, closeModal, openModal]);
 
     React.useEffect(() => {
         if (
@@ -132,7 +165,14 @@ export const CountryPicker = ({
                     useNativeDriver: false,
                 }).start();
         }
-    }, [keyboardStatus.isOpen]);
+    }, [
+        androidWindowSoftInputMode,
+        animatedMargin,
+        enableModalAvoiding,
+        keyboardStatus.isOpen,
+        keyboardStatus.keyboardHeight,
+        keyboardStatus.keyboardPlatform,
+    ]);
 
     const preparedPopularCountries: CountryItem[] = React.useMemo(() => {
         const filtered = filteredCodes.filter(country => {
@@ -145,7 +185,7 @@ export const CountryPicker = ({
 
         // Keep the same order
         return filtered.sort((a, b) => popularCountries.indexOf(a.code) - popularCountries.indexOf(b.code));
-    }, [popularCountries]);
+    }, [filteredCodes, popularCountries]);
 
     const codes: CountryItem[] = React.useMemo(() => {
         let newCodes = filteredCodes;
@@ -156,21 +196,17 @@ export const CountryPicker = ({
             });
         }
 
-        newCodes.sort((a, b) => (a?.name[lang || 'en'].localeCompare(b?.name[lang || 'en'])));
-
-        return newCodes;
-    }, [showOnly, excludedCountries, lang]);
+        return [...newCodes].sort((a, b) => countryName(a, lang).localeCompare(countryName(b, lang)));
+    }, [filteredCodes, showOnly, lang]);
 
     const resultCountries: CountryItem[] = React.useMemo(() => {
         const lowerSearchValue = searchValue.toLowerCase();
 
         return codes.filter((country) => {
-            if (country?.dial_code.includes(searchValue) ||
-                country?.name[lang || 'en'].toLowerCase().includes(lowerSearchValue) ||
-                removeDiacritics(country?.name[lang || 'en'].toLowerCase()).includes(lowerSearchValue)
-            ) {
-                return country;
-            }
+            const name = countryName(country, lang).toLowerCase();
+            return country.dial_code.includes(searchValue) ||
+                name.includes(lowerSearchValue) ||
+                removeDiacritics(name).includes(lowerSearchValue);
         });
     }, [searchValue, codes, lang]);
 
@@ -191,14 +227,14 @@ export const CountryPicker = ({
             ...popularList.map(c => ({...c, __type: "popular"})),
             {
                 __type: "separator",
-                name: {},
+                name: {en: ""},
                 dial_code: "",
                 code: "",
                 flag: ""
             }, // Fake item
             ...otherList.map(c => ({...c, __type: "normal"})),
         ];
-    }, [resultCountries, popularCountries, searchValue]);
+    }, [resultCountries, popularCountries, preparedPopularCountries, searchValue]);
 
     const modalPosition = animationDriver.interpolate({
         inputRange: [0, 1],
@@ -212,22 +248,6 @@ export const CountryPicker = ({
         extrapolate: 'clamp'
     });
 
-    const openModal = () => {
-        Animated.timing(animationDriver, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    const closeModal = () => {
-        Animated.timing(animationDriver, {
-            toValue: 0,
-            duration: 400,
-            useNativeDriver: true,
-        }).start(() => setShowModal(false));
-    };
-
     const renderItem = ({item, index}: { item: CountryItemWithType, index: number }) => {
         if (item.__type === "separator") {
             return (
@@ -235,15 +255,12 @@ export const CountryPicker = ({
             );
         }
 
-        let itemName = item?.name[lang];
-        let checkName = itemName?.length ? itemName : item?.name['en'];
-
         return (
             <ItemTemplate
                 key={index}
                 item={item}
                 style={style}
-                name={checkName}
+                name={countryName(item, lang)}
                 onPress={() => {
                     Keyboard.dismiss();
                     pickerButtonOnPress?.(item);
@@ -352,7 +369,7 @@ export const CountryPicker = ({
                                         typeof pickerButtonOnPress === 'function' && pickerButtonOnPress(item);
                                     }}
                                 />
-                                : null
+                                : undefined
                             }
                             {...rest}
                         />
@@ -399,13 +416,13 @@ export const CountryList = ({
                                 ...rest
                             }: CountryListProps) => {
     // ToDo refactor exclude and showOnly props to objects
-    let filteredCodes = countriesRemover(excludedCountries);
+    const filteredCodes = React.useMemo(() => countriesRemover(excludedCountries), [excludedCountries]);
 
     const preparedPopularCountries = React.useMemo(() => {
         return filteredCodes?.filter(country => {
             return (popularCountries?.find(short => country?.code === short?.toUpperCase()));
         });
-    }, [popularCountries]);
+    }, [filteredCodes, popularCountries]);
 
     const codes = React.useMemo(() => {
         let newCodes = filteredCodes;
@@ -417,31 +434,26 @@ export const CountryList = ({
         }
 
         return newCodes
-    }, [showOnly, excludedCountries]);
+    }, [filteredCodes, showOnly]);
 
     const resultCountries = React.useMemo(() => {
         const lowerSearchValue = searchValue.toLowerCase();
 
         return codes.filter((country) => {
-            if (country?.dial_code.includes(searchValue) ||
-                country?.name[lang || 'en'].toLowerCase().includes(lowerSearchValue.trim()) ||
-                removeDiacritics(country?.name[lang || 'en'].toLowerCase()).includes(lowerSearchValue.trim())
-            ) {
-                return country;
-            }
+            const name = countryName(country, lang).toLowerCase();
+            return country.dial_code.includes(searchValue) ||
+                name.includes(lowerSearchValue.trim()) ||
+                removeDiacritics(name).includes(lowerSearchValue.trim());
         });
-    }, [searchValue]);
+    }, [searchValue, codes, lang]);
 
     const renderItem = ({item, index}: { item: CountryItem, index: number }) => {
-        let itemName = item?.name[lang];
-        let checkName = itemName.length ? itemName : item?.name['en'];
-
         return (
             <ItemTemplate
                 key={index}
                 item={item}
                 style={style}
-                name={checkName}
+                name={countryName(item, lang)}
                 onPress={() => {
                     Keyboard.dismiss();
                     typeof pickerButtonOnPress === 'function' && pickerButtonOnPress(item);

@@ -1,5 +1,6 @@
 import React from 'react';
 import {Text, TouchableOpacity, ViewStyle} from "react-native";
+
 import {ItemTemplateProps} from "../types/Types";
 
 

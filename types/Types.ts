@@ -14,7 +14,7 @@ export interface ListHeaderComponentProps {
 }
 
 export interface CountryItem {
-    name: { [key: string]: string },
+    name: { en: string, [key: string]: string },
     dial_code: string,
     code: string,
     flag: string
