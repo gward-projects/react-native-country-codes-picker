@@ -101,31 +101,27 @@ export const CountryPicker = ({
     const [searchValue, setSearchValue] = useState<string>(initialState || '');
     const [showModal, setShowModal] = useState<boolean>(false);
 
-    // True while the closing animation runs: the modal is still visible, so reopening it
-    // then must restart the opening animation, since onShow will not fire again.
-    const isClosing = useRef(false);
+    // True once the opening animation has finished: until then, and while closing, a touch on
+    // the backdrop is ignored, so that quick repeated taps cannot interrupt the opening.
+    const isOpened = useRef(false);
 
     const openModal = useCallback(() => {
-        isClosing.current = false;
         Animated.timing(animationDriver, {
             toValue: 1,
             duration: 400,
             useNativeDriver: true,
-        }).start();
+        }).start(({finished}) => {
+            if (finished) isOpened.current = true;
+        });
     }, [animationDriver]);
 
     const closeModal = useCallback(() => {
-        isClosing.current = true;
+        isOpened.current = false;
         Animated.timing(animationDriver, {
             toValue: 0,
             duration: 400,
             useNativeDriver: true,
-        }).start(({finished}) => {
-            // Interrupted by a reopening: the modal must stay visible.
-            if (!finished) return;
-            isClosing.current = false;
-            setShowModal(false);
-        });
+        }).start(() => setShowModal(false));
     }, [animationDriver]);
 
     useEffect(() => {
@@ -134,11 +130,10 @@ export const CountryPicker = ({
             // modal invisible in gward-app, on the web and on iOS (tested on 18/10/2026).
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setShowModal(true);
-            if (isClosing.current) openModal();
         } else {
             closeModal();
         }
-    }, [show, closeModal, openModal]);
+    }, [show, closeModal]);
 
     useEffect(() => {
         if (
@@ -270,7 +265,7 @@ export const CountryPicker = ({
     };
 
     const onStartShouldSetResponder = () => {
-        onBackdropPress?.();
+        if (isOpened.current) onBackdropPress?.();
         return false;
     };
 

@@ -98,10 +98,14 @@ imports de types avec les modules du projet.
   pour l'affichage, le tri et la recherche ;
 - `CountryItem.name` exige une clé `en` ;
 - `CountryList` recalcule sa recherche quand `lang` ou la liste des pays change ;
-- `CountryPicker` : rouvrir la modale pendant son animation de fermeture relance l'ouverture
-  (avant, la modale se cachait alors que `show` valait `true`). L'ouverture reste celle de l'amont
-  (`setShowModal` dans un effet, règle `set-state-in-effect` désactivée sur cette ligne) : la
-  dériver pendant le rendu laissait la modale invisible dans gward-app, sur le web et iOS.
+- `CountryPicker` : l'ouverture et la fermeture restent celles de l'amont (`setShowModal` dans un
+  effet, règle `set-state-in-effect` désactivée sur cette ligne). Deux tentatives ont été écartées
+  le 18 octobre 2026 après des tests dans gward-app : dériver l'ouverture pendant le rendu laissait
+  la modale invisible (web et iOS) ; ignorer la fin d'une fermeture interrompue la laissait bloquée
+  ouverte après des clics rapides, iOS pouvant signaler `onShow` pendant la fermeture. Ne pas
+  réintroduire ces changements sans test sur appareil ;
+- `CountryPicker` : un toucher sur le fond n'appelle `onBackdropPress` qu'une fois l'animation
+  d'ouverture terminée (`isOpened`), pour que des clics rapides n'interrompent pas l'ouverture.
 
 ## Dépendances
 
