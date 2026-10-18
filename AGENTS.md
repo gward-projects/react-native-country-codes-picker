@@ -40,6 +40,11 @@ doute, regarder comment gward-app fait (`documentation/instructions/`, `eslint.c
 - Versions : les forks suivent les dernières versions publiées (gward-app est mis à jour ensuite),
   sauf TypeScript, qui reste en 6.x tant qu'Expo et React Native ne prennent pas en charge
   TypeScript 7.
+- Le code doit aussi compiler avec la version de React Native de gward-app, souvent plus ancienne.
+  En React Native 0.86, les types par défaut sont les anciens (`types/index.d.ts`) ; en 0.88, ce
+  sont les types stricts (`types_generated`), que les forks utilisent. Exemple :
+  `NativeEventEmitter` n'est générique qu'avec les types stricts. Avant d'épingler un nouveau
+  commit dans gward-app, vérifier `yarn typecheck` de l'app avec ce commit installé.
 - Ne pas profiter d'une tâche pour refactoriser ce qui n'est pas demandé ; chaque écart avec
   l'amont rend les fusions depuis l'amont plus difficiles.
 
